@@ -78,10 +78,7 @@ export default {
     },
     edit: function(todo) {
       todo.editStatue = true;
-      // this.todolist[number].editStatue = true;
-      // this.edit = number;
       this.editedTodo = todo;
-      console.log(todo);
     },
     SelectedShow: function() {
       this.onlySelectedShow = false;
@@ -114,8 +111,6 @@ export default {
   directives: {
     focus: {
       inserted: function(el,binding) {
-        // console.log(el);
-        console.log(binding.value);
         if (binding.value) {
 					el.focus();
 				}
