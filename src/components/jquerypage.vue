@@ -1,4 +1,17 @@
-<template>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>jquerytodolist</title>
+    <script type="text/javascript" src="../assets/js/jquery.js"></script>
+    <link rel="stylesheet" href="../assets/css/public.css">
+
+</head>
+
+<body>
     <div>
         <div class="title">
             <span>todos</span>
@@ -6,7 +19,7 @@
         <div class="app">
 
             <div class="todoinput">
-                <input type="checkbox" name="" id="" class="todolistSelectAll">
+                <input type="checkbox" name="" id="" class="todolistSelectAll" onclick="todolistSelectAll(this)">
                 <input type="text" name="" id="" class="userinput" placeholder="What needs to be done?">
             </div>
             <div class="todolist">
@@ -26,9 +39,13 @@
                             <input type="text" name="" id="" class="userChangeTodo">
                         </li>
                         <li>
-                            <input type="checkbox" name="" id="" class="todoCheck">
-                            <span>asdasd</span>
-                            <button class="delete">x</button>
+                            <div>
+                                <input type="checkbox" name="" id="" class="todoCheck">
+                                <span>asdasd</span>
+                                <button class="delete">x</button>
+                            </div>
+
+                            <input type="text" name="" id="" class="userChangeTodo" style="display: block">
                         </li>
                         <li class="todoOver">
                             <input type="checkbox" name="" id="" class="todoCheck">
@@ -42,199 +59,164 @@
                     <button>All</button>
                     <button>Active</button>
                     <button>Completed</button>
-                    <a href="">Clear completed</a>
+                    <a onclick="deleteTodoList()">Clear completed</a>
                 </div>
             </div>
         </div>
     </div>
 
-</template>
+
+    <script type="text/javascript">
+        // var todolistData = [{
+        //     text: '1',
+        //     checkStatus: false,
+        // }, {
+        //     text: '2',
+        //     checkStatus: false,
+        // }, {
+        //     text: '3',
+        //     checkStatus: false,
+        // }, {
+        //     text: '4',
+        //     checkStatus: true,
+        // }, ];
+        var todolistData = [];
+        var editing;
+        var listbuttonStatus = 'All';
+        // document.ready = function() {
+        //     todolistData = JSON.parse(window.localStorage.getItem("todolist"));
+        //     showTodolist(todolistData);
+        // }
+        $(document).ready(function() {
+            if (JSON.parse(window.localStorage.getItem("todolist"))) {
+                todolistData = JSON.parse(window.localStorage.getItem("todolist"));
+            }
+            showTodolist(todolistData);
+        })
+
+        function showTodolist() {
+            $('.listinfo').empty();
+            $('.todolist').hide();
+            // todolistData = JSON.parse(window.localStorage.getItem("todolist"));
+            if (todolistData && todolistData.length > 0) {
+                $('.todolist').show();
+                let strHtml = '';
+                todolistData.map(function(item, index) {
+                    let checkboxStatus = item.checkStatus ? 'checked' : '';
+                    let listyle = item.checkStatus ? 'todoOver' : '';
+                    strHtml += `<li class = "${listyle}" number = "${index}">
+                            <div>
+                                <input type="checkbox" name="" id="" class="todoCheck" ${checkboxStatus}>
+                                <span>${item.text}</span>
+                                <button class="delete">x</button>
+                            </div>
+                            <input type="text" name="" id="" class="userChangeTodo" style="display: none">
+                        </li>`;
+                })
+                $('.listinfo').append(strHtml);
+                document.querySelector('.listbutton span').innerText = todolistData.length + ' items left';
+            }
+            localStorage.setItem("todolist", JSON.stringify(todolistData));
+        }
+        $('.listinfo').on('click', '.todoCheck', function(e) {
+            console.log(e);
+            console.log('todocheck');
+            const ele = e.target.parentElement.parentElement;
+            const eleindex = ele.getAttribute('number');
+            if (e.target.checked) {
+                $(ele).addClass('todoOver');
+            } else {
+                $(ele).removeClass('todoOver');
+            }
+            todolistData[eleindex].checkStatus = e.target.checked;
+            localStorage.setItem("todolist", JSON.stringify(todolistData));
+        })
+
+        $('.listinfo').on('click', 'button', function(e) {
+            const ele = e.target.parentElement.parentElement;
+            const eleindex = ele.getAttribute('number');
+            todolistData.splice(eleindex, 1);
+            showTodolist(todolistData);
+        })
+
+        $('.listinfo').on('dblclick', 'span', function(e) {
+            const ele = e.target.parentElement.parentElement;
+            editing = ele.getAttribute('number');
+            const thisele = document.querySelectorAll('.listinfo li>input')[editing];
+            $(document.querySelectorAll('.listinfo div')[editing]).hide();
+            $(thisele).show();
+            thisele.value = todolistData[editing].text;
+            $(thisele).focus(function() { //focus
+                $(thisele).blur(function(e) {
+                    const value = document.querySelectorAll('.listinfo li>input')[editing].value;
+                    if (value.replace(/(^\s*)|(\s*$)/g, '')) {
+                        $(document.querySelectorAll('.listinfo div')[editing]).show();
+                        todolistData[editing].text = document.querySelectorAll('.listinfo li>input')[editing].value;
+                    }
+                    showTodolist(todolistData);
+                })
+                $(thisele).bind("keypress", function(event) {
+                    const value = document.querySelectorAll('.listinfo li>input')[editing].value;
+                    if (event.keyCode == "13" && value.replace(/(^\s*)|(\s*$)/g, '')) {
+                        todolistData[editing].text = document.querySelectorAll('.listinfo li>input')[editing].value;
+                        showTodolist(todolistData);
+                    }
+                });
+            });
+            // document.querySelectorAll('.listinfo li>input')[eleindex].blur(function() {
+            //     console.log('asdasdasd')
+
+            // });
+
+        })
 
 
-<script>
-export default {};
-</script>
+        $(".userinput").bind("keypress", function(event) {
+            if (event.keyCode == "13" && $(".userinput").val().replace(/(^\s*)|(\s*$)/g, '')) {
+                const value = $(".userinput").val();
+                const todo = {
+                    checkStatus: false,
+                    text: value
+                }
+                todolistData.push(todo);
+                showTodolist(todolistData);
+                $(".userinput").val('')
+            }
 
-<style scoped>
-.app {
-  width: 550px;
-  margin: 0 auto 0;
-  background: rgba(0, 0, 0, 0);
-  position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
-}
-.title span {
-  font-size: 100px;
-  color: rgba(255, 0, 0, 0.1);
-}
-.todoinput {
-  position: relative;
-  width: 550px;
-  height: 50px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-.todoinput .todolistSelectAll {
-  width: 50px;
-  height: 50px;
-  transform: rotate(90deg);
-  -webkit-appearance: none;
-  outline: none;
-  position: absolute;
-  margin: 0;
-  margin-top: -10px;
-  margin-left: -10px;
-}
-.todoinput .todolistSelectAll::before {
-  content: "❯";
-  font-size: 22px;
-  color: #e6e6e6;
-  padding: 10px 27px 10px 27px;
-}
-.todoinput .todolistSelectAll:checked:before {
-  color: #737373;
-}
-.todoinput .userinput {
-  width: 500px;
-  height: 50px;
-  margin-left: 50px;
-  font-size: 22px;
-  border: 0;
-  padding: 0;
-  outline: none;
-}
+        });
 
-.todoinput .userinput::-webkit-input-placeholder {
-  color: rgba(0, 0, 0, 0.2);
-  font-style: oblique;
-  font-size: 22px;
-}
+        function todolistSelectAll(ele) {
+            for (let i = 0; i < todolistData.length; i++) {
+                todolistData[i].checkStatus = ele.checked; //ele.checked
+            }
+            showTodolist(todolistData);
+        }
 
-.todolist .listinfo ul,
-li {
-  position: relative;
-  list-style: none;
-  margin: 0;
-  text-align: left;
-  padding: 0;
-  border: 0;
-}
-.todolist .listinfo ul li {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-.todolist .listinfo .todoCheck {
-  width: 50px;
-  height: 50px;
-  -webkit-appearance: none;
-  outline: none;
-  margin: 0;
-  float: left;
-  padding: 5px 0 5px;
-  margin: auto 0;
-  top: 0;
-  bottom: 0;
-  position: absolute;
-}
-.todolist .listinfo .todoCheck::after {
-  content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
-}
-.todolist .listinfo .todoCheck:checked:after {
-  content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
-}
-.todolist .listinfo span {
-  width: 450px;
-  margin-left: 50px;
-  display: inherit;
-  line-height: 50px;
-  font-size: 22px;
-  white-space: pre-line;
-  word-break: break-all;
-}
-.todolist .listinfo li:hover > bottom{
-  display: block;
-}
-.todolist .listinfo .delete {
-  position: absolute;
-  background: rgba(0, 0, 0, 0);
-  border: 0px;
-  top: 0;
-  right: 10px;
-  bottom: 0;
-  width: 40px;
-  height: 40px;
-  margin: auto 0;
-  font-size: 30px;
-  color: #cc9a9a;
-  margin-bottom: 11px;
-  outline: none;
-  display: none;
-}
-.todolist .listinfo .userChangeTodo {
-  width: 499px;
-  height: 50px;
-  margin-left: 50px;
-  font-size: 22px;
-  border: 0;
-  padding: 0;
-  outline: none;
-}
+        $('.listbutton').on('click', 'button', function(e) {
+            console.log(e.target);
+            const ele = e.target;
+            switch (ele.innerText) {
+                case 'All':
+                    $('.listinfo li').show();
+                    break;
+                case 'Active':
+                    $('.listinfo li').hide();
+                    $('.listinfo .todoOver').show();
+                    break;
+                case 'Completed':
+                    $('.listinfo li').show();
+                    $('.listinfo .todoOver').hide();
+                    break;
+                default:
+                    break;
+            }
+        })
 
-.todolist .listinfo .userChangeTodo:focus {
-  border: 1px solid rgba(0, 0, 0, 0.8);
-}
-.todolist .listinfo .todoOver{
-    text-decoration: line-through;
-    opacity: 0.2;
-}
-.listbutton {
-  color: #777;
-  padding: 10px 15px;
-  height: 20px;
-  text-align: center;
-  border-top: 1px solid #e6e6e6;
-  position: relative;
-  z-index: 1;
-}
-.listbutton span {
-  margin-left: -10px;
-  margin-right: 100px;
-}
-.listbutton button {
-  border: 1px solid rgba(0, 0, 0, 0);
-  background-color: rgba(0, 0, 0, 0);
-  cursor: pointer;
-  color: inherit;
-  outline: none;
-}
-.listbutton button:hover {
-  border: 1px solid rgba(255, 0, 0, 0.2);
-  border-radius: 3px;
-}
-.listbutton .btnchecked {
-  border: 1px solid rgba(255, 0, 0, 0.2);
-  border-radius: 3px;
-}
+        function deleteTodoList() {
+            todolistData = [];
+            showTodolist(todolistData);
+        }
+    </script>
+</body>
 
-.listbutton a {
-  margin-left: 40px;
-  color: inherit;
-  text-decoration: none;
-}
-
-.listbutton a:hover {
-  text-decoration: underline;
-}
-.listbutton::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 50px;
-  overflow: hidden;
-  z-index: -1;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2), 0 8px 0 -3px #f6f6f6,
-    0 9px 1px -3px rgba(0, 0, 0, 0.2), 0 16px 0 -6px #f6f6f6,
-    0 17px 2px -6px rgba(0, 0, 0, 0.2);
-}
-</style>
+</html>
