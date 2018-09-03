@@ -55,9 +55,8 @@
 
    
 <script>
-
-
-
+export default {
+    mounted(){
         var todolistData = [];
         var editing;
         var listbuttonStatus = 'All';
@@ -227,4 +226,11 @@
             }
 
         });
-    </script>
+    },
+};
+</script>
+
+
+<style lang="less" scoped>
+
+</style>
