@@ -56,29 +56,13 @@
 import * as $ from 'jquery'
 export default {
     mounted(){
+      this.name()
     },
     methods: {
-        name(params) {
-    // var todolistData = [{
-            //     text: '1',
-            //     checkStatus: false,
-            // }, {
-            //     text: '2',
-            //     checkStatus: false,
-            // }, {
-            //     text: '3',
-            //     checkStatus: false,
-            // }, {
-            //     text: '4',
-            //     checkStatus: true,
-            // }, ];
+        name() {
             var todolistData = [];
             var editing;
             var listbuttonStatus = 'All';
-            // document.ready = function() {
-            //     todolistData = JSON.parse(window.localStorage.getItem("todolist"));
-            //     showTodolist(todolistData);
-            // }
             $(document).ready(function() {
                 if (JSON.parse(window.localStorage.getItem("todolist"))) {
                     todolistData = JSON.parse(window.localStorage.getItem("todolist"));
@@ -89,7 +73,6 @@ export default {
             function showTodolist() {
                 $('.listinfo').empty();
                 $('.todolist').hide();
-                // todolistData = JSON.parse(window.localStorage.getItem("todolist"));
                 if (todolistData && todolistData.length > 0) {
                     $('.todolist').show();
                     let strHtml = '';
@@ -207,5 +190,5 @@ export default {
     }
 }
 </script>
-   
+
 
